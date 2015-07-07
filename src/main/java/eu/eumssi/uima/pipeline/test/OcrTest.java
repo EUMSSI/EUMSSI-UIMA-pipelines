@@ -26,6 +26,7 @@ import eu.eumssi.uima.reader.OcrReader;
 import eu.eumssi.uima.ts.AsrToken;
 import eu.eumssi.uima.ts.OcrSegment;
 import eu.eumssi.uima.ts.SourceMeta;
+import eu.eumssi.uima.ts.TopOcrSegment;
 
 
 /**
@@ -51,7 +52,8 @@ public class OcrTest
 				OcrReader.PARAM_FIELDS, "processing.results.video_ocr",
 				//AsrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': {'$ne': 'ner'}}",
 				OcrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': 'video_ocr'}",
-				OcrReader.PARAM_LANG,"{'$literal':'en'}"
+				OcrReader.PARAM_LANG,"{'$literal':'en'}",
+				OcrReader.PARAM_ONLYBEST,false
 				);
 
 		AnalysisEngineDescription segmenter = createEngineDescription(LanguageToolSegmenter.class);
@@ -88,11 +90,14 @@ public class OcrTest
 			SourceMeta meta = selectSingle(jcas, SourceMeta.class);
 			System.out.println("\n\n=========\n\n" + meta.getDocumentId() + ":\n" + jcas.getDocumentText() + "\n");
 
-			for (OcrSegment ocrSegment : select(jcas, OcrSegment.class)) {
-				System.out.printf("  %-16s\t%-10d\t%-10d\t%n", 
+			for (OcrSegment ocrSegment : select(jcas, TopOcrSegment.class)) {
+				System.out.printf("  %-16s\t%-16s\t%-10d\t%-10d\t%-10d\t%-10d\t\n", 
 						ocrSegment.getCoveredText(),
+						ocrSegment.getText(),
 						ocrSegment.getBeginTime(),
-						ocrSegment.getEndTime()
+						ocrSegment.getEndTime(),
+						ocrSegment.getBegin(),
+						ocrSegment.getEnd()
 						);
 			}
 			
