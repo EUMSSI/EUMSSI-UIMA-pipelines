@@ -17,7 +17,7 @@ import com.iai.uima.analysis_component.KeyPhraseAnnotator;
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
 import de.tudarmstadt.ukp.dkpro.core.io.xmi.XmiWriter;
 import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
-//import de.tudarmstadt.ukp.dkpro.core.mallet.topicmodel.MalletTopicModelEstimator;
+import de.tudarmstadt.ukp.dkpro.core.mallet.topicmodel.MalletTopicModelEstimator;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordNamedEntityRecognizer;
 import eu.eumssi.uima.mallet.lda.MalletTopicInferer;
 import eu.eumssi.uima.pipeline.BasicNerPipeline;
@@ -71,15 +71,15 @@ public class CompletePipelineTest {
 		AnalysisEngineDescription segmenter = createEngineDescription(LanguageToolSegmenter.class,
 				LanguageToolSegmenter.PARAM_LANGUAGE,lang);
 		
-//		AnalysisEngineDescription estimator = createEngineDescription(
-//                MalletTopicModelEstimator.class,
-//                MalletTopicModelEstimator.PARAM_N_THREADS, 2,
-//                MalletTopicModelEstimator.PARAM_TARGET_LOCATION, "input/models/mallet/"+lang+"/model.mallet",
-//                MalletTopicModelEstimator.PARAM_N_ITERATIONS, 100,
-//                MalletTopicModelEstimator.PARAM_N_TOPICS, 10,
-//                MalletTopicModelEstimator.PARAM_USE_LEMMA, true);
+		AnalysisEngineDescription estimator = createEngineDescription(
+                MalletTopicModelEstimator.class,
+                MalletTopicModelEstimator.PARAM_N_THREADS, 2,
+                MalletTopicModelEstimator.PARAM_TARGET_LOCATION, "input/models/mallet/"+lang+"/model.mallet",
+                MalletTopicModelEstimator.PARAM_N_ITERATIONS, 100,
+                MalletTopicModelEstimator.PARAM_N_TOPICS, 10,
+                MalletTopicModelEstimator.PARAM_USE_LEMMA, true);
 		
-//        SimplePipeline.runPipeline(reader, segmenter, estimator);
+        SimplePipeline.runPipeline(reader, segmenter, estimator);
 	}
 	
 	

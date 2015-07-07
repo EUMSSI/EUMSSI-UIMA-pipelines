@@ -172,13 +172,13 @@
 			<artifactId>MalletAnnotator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		<!-- dependency>
+		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.core.mallet</groupId>
 			<artifactId>
 				de.tudarmstadt.ukp.dkpro.core.mallet
 			</artifactId>
 			<version>1.8.0-SNAPSHOT</version>
-		</dependency -->
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
