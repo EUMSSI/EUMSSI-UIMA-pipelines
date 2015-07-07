@@ -182,14 +182,12 @@
 	</dependencies>
 	<repositories>
 		<repository>
+			<id>ukp-oss-releases</id>
+			<url>http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-releases</url>
+		</repository>
+		<repository>
 			<id>ukp-oss-snapshots</id>
-			<url>http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
+			<url>http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots</url>
 		</repository>
 	</repositories>
 </project>
