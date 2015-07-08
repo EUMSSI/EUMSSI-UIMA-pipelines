@@ -73,8 +73,7 @@ public class BasicNerPipeline
 				);
 
 		logger.info("starting pipeline");
-		//SimplePipeline.runPipeline(reader, segmenter, dbpedia, ner, validate, mongoWriter);
-		SimplePipeline.runPipeline(reader, segmenter, dbpedia, ner, validate);
+		SimplePipeline.runPipeline(reader, segmenter, dbpedia, ner, validate, mongoWriter);
 	}
 
 
