@@ -49,7 +49,7 @@ public class BasicNerPipeline
 		AnalysisEngineDescription segmenter = createEngineDescription(LanguageToolSegmenter.class);
 
 		AnalysisEngineDescription dbpedia = createEngineDescription(SpotlightAnnotator.class,
-				SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2223/rest",
+				SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2222/rest",
 				//SpotlightAnnotator.PARAM_ENDPOINT, "http://spotlight.sztaki.hu:2222/rest",
 				//SpotlightAnnotator.PARAM_ENDPOINT, "http://de.dbpedia.org/spotlight/rest",
 				SpotlightAnnotator.PARAM_CONFIDENCE, 0.6f,
