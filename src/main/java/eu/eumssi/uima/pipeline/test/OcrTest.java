@@ -14,6 +14,7 @@ import org.apache.uima.fit.pipeline.JCasIterable;
 import org.apache.uima.jcas.JCas;
 import org.dbpedia.spotlight.uima.SpotlightAnnotator;
 import org.dbpedia.spotlight.uima.types.DBpediaResource;
+import org.dbpedia.spotlight.uima.types.TopDBpediaResource;
 
 import com.iai.uima.analysis_component.KeyPhraseAnnotator;
 
@@ -21,12 +22,9 @@ import de.tudarmstadt.ukp.dkpro.core.api.ner.type.NamedEntity;
 import de.tudarmstadt.ukp.dkpro.core.io.xmi.XmiWriter;
 import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordNamedEntityRecognizer;
-import eu.eumssi.uima.reader.AsrReader;
 import eu.eumssi.uima.reader.OcrReader;
-import eu.eumssi.uima.ts.AsrToken;
 import eu.eumssi.uima.ts.OcrSegment;
 import eu.eumssi.uima.ts.SourceMeta;
-import eu.eumssi.uima.ts.TopOcrSegment;
 
 
 /**
@@ -53,15 +51,16 @@ public class OcrTest
 				//AsrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': {'$ne': 'ner'}}",
 				OcrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': 'video_ocr'}",
 				OcrReader.PARAM_LANG,"{'$literal':'en'}",
-				OcrReader.PARAM_ONLYBEST,false
+				OcrReader.PARAM_ONLYBEST,false,
+				OcrReader.PARAM_VERTICALLY_ALIGNED,false
 				);
 
 		AnalysisEngineDescription segmenter = createEngineDescription(LanguageToolSegmenter.class);
 
 		AnalysisEngineDescription dbpedia = createEngineDescription(SpotlightAnnotator.class,
-				//SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2222/rest",
+				SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2222/rest",
 				//SpotlightAnnotator.PARAM_ENDPOINT, "http://spotlight.dbpedia.org/rest",
-				SpotlightAnnotator.PARAM_ENDPOINT, "http://spotlight.sztaki.hu:2222/rest",
+				//SpotlightAnnotator.PARAM_ENDPOINT, "http://spotlight.sztaki.hu:2222/rest",
 				//SpotlightAnnotator.PARAM_ENDPOINT, "http://de.dbpedia.org/spotlight/rest",
 				SpotlightAnnotator.PARAM_CONFIDENCE, 0.0f,
 				SpotlightAnnotator.PARAM_ALL_CANDIDATES, true);
@@ -79,9 +78,9 @@ public class OcrTest
 		JCasIterable pipeline = new JCasIterable(
 				reader,
 				segmenter,
-				//dbpedia,
+				dbpedia,
 				//key,
-				//ner,
+				ner,
 				xmiWriter
 				);
 
@@ -90,7 +89,7 @@ public class OcrTest
 			SourceMeta meta = selectSingle(jcas, SourceMeta.class);
 			System.out.println("\n\n=========\n\n" + meta.getDocumentId() + ":\n" + jcas.getDocumentText() + "\n");
 
-			for (OcrSegment ocrSegment : select(jcas, TopOcrSegment.class)) {
+			for (OcrSegment ocrSegment : select(jcas, OcrSegment.class)) {
 				System.out.printf("  %-16s\t%-16s\t%-10d\t%-10d\t%-10d\t%-10d\t\n", 
 						ocrSegment.getCoveredText(),
 						ocrSegment.getText(),
@@ -102,13 +101,18 @@ public class OcrTest
 			}
 			
 			System.out.printf("%n  -- DBpedia --%n");
-			for (DBpediaResource resource : select(jcas, DBpediaResource.class)) {
+			for (DBpediaResource resource : select(jcas, TopDBpediaResource.class)) {
 				System.out.printf("  %-16s\t%-10s\t%-10s%n", 
 						resource.getCoveredText(),
 						resource.getUri(),
 						resource.getTypes());
 			}
 
+			/* Note: NER is basically worthless on OCR output.
+			 * Completely wrong hypotheses are marked as entities with random types.
+			 * Additionally, NER detection would need to be constrained to individual transcriptions.
+			 */
+			System.out.printf("%n  -- NER --%n");
 			for (NamedEntity entity : select(jcas, NamedEntity.class)) {
 				System.out.printf("  %-16s %-10s %n", 
 						entity.getCoveredText(),
