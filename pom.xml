@@ -184,6 +184,36 @@
 			<artifactId>jersey-bundle</artifactId>
 			<version>1.19</version>
 		</dependency>
+		<dependency>
+			<groupId>de.unihd.dbs</groupId>
+			<artifactId>heideltime</artifactId>
+			<version>1.9</version>
+		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.opennlp-model-chunker-en-default
+			</artifactId>
+			<version>20100908.1</version>
+		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.matetools-gpl
+			</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.opennlp-asl
+			</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.stopwordremover-asl
+			</artifactId>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>

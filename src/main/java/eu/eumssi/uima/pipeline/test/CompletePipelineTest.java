@@ -10,7 +10,6 @@ import org.apache.uima.UIMAException;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReaderDescription;
 import org.apache.uima.fit.pipeline.SimplePipeline;
-import org.dbpedia.spotlight.uima.SpotlightAnnotator;
 
 import com.iai.uima.analysis_component.KeyPhraseAnnotator;
 
@@ -18,7 +17,14 @@ import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
 import de.tudarmstadt.ukp.dkpro.core.io.xmi.XmiWriter;
 import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.mallet.topicmodel.MalletTopicModelEstimator;
+import de.tudarmstadt.ukp.dkpro.core.matetools.MatePosTagger;
+import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpChunker;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordNamedEntityRecognizer;
+import de.tudarmstadt.ukp.dkpro.core.stopwordremover.StopWordRemover;
+import de.unihd.dbs.uima.annotator.annotationtranslator.AnnotationTranslator;
+import de.unihd.dbs.uima.annotator.heideltime.HeidelTime;
+import de.unihd.dbs.uima.annotator.intervaltagger.IntervalTagger;
+import de.unihd.dbs.uima.annotator.treetagger.TreeTaggerWrapper;
 import eu.eumssi.uima.mallet.lda.MalletTopicInferer;
 import eu.eumssi.uima.pipeline.BasicNerPipeline;
 
@@ -45,7 +51,7 @@ public class CompletePipelineTest {
 						case 'i' : source = args[++i]; break;
 						case 'e' : endpoint = args[++i]; break;
 						case 'o' : target = args[++i]; break;
-						case 'm' : estimateModel = Boolean.valueOf(args[++i]); break;
+						case 'm' : estimateModel = true; i++; break;
 						case 'c' : conf = Float.valueOf(args[++i]); break;
 						case 'r' : ratio = Integer.valueOf(args[++i]); break;
 						default : 	System.err.println("Unrecognized Option: "
@@ -71,20 +77,26 @@ public class CompletePipelineTest {
 		AnalysisEngineDescription segmenter = createEngineDescription(LanguageToolSegmenter.class,
 				LanguageToolSegmenter.PARAM_LANGUAGE,lang);
 		
+		AnalysisEngineDescription swr = createEngineDescription(StopWordRemover.class,
+				StopWordRemover.PARAM_MODEL_LOCATION,"input/mallet/stopwords/en.txt");
+		
 		AnalysisEngineDescription estimator = createEngineDescription(
                 MalletTopicModelEstimator.class,
-                MalletTopicModelEstimator.PARAM_N_THREADS, 2,
-                MalletTopicModelEstimator.PARAM_TARGET_LOCATION, "input/models/mallet/"+lang+"/model.mallet",
+                MalletTopicModelEstimator.PARAM_N_THREADS, 4,
+                MalletTopicModelEstimator.PARAM_TARGET_LOCATION, "input/models/mallet/"+lang+"/model",
                 MalletTopicModelEstimator.PARAM_N_ITERATIONS, 100,
-                MalletTopicModelEstimator.PARAM_N_TOPICS, 10,
-                MalletTopicModelEstimator.PARAM_USE_LEMMA, true);
+                MalletTopicModelEstimator.PARAM_N_TOPICS, 13,
+                MalletTopicModelEstimator.PARAM_DISPLAY_N_TOPIC_WORDS, 50,
+                MalletTopicModelEstimator.PARAM_USE_LEMMA, false);
 		
-        SimplePipeline.runPipeline(reader, segmenter, estimator);
+        SimplePipeline.runPipeline(reader, segmenter, swr ,estimator);
 	}
-	
 	
 	public static void main(String[] args) throws Exception
 	{
+		
+		System.setProperty("HEIDELTIME_HOME", "D:/merlin/GitHub/heideltime/");
+		
 		// Don't forget to set System Property KEA_HOME
 		parseArgs(args);
 		
@@ -104,36 +116,65 @@ public class CompletePipelineTest {
 				LanguageToolSegmenter.PARAM_LANGUAGE,"en");
 		
 		AnalysisEngineDescription mallet = createEngineDescription(MalletTopicInferer.class,
-				MalletTopicInferer.PARAM_MODEL_LOCATION,"input/models/mallet/"+lang+"/model.mallet");
+				MalletTopicInferer.PARAM_MODEL_LOCATION,"input/models/mallet/"+lang+"/model");
 		
-		// XXX Needs heavy re configuration in the descriptor file if you want to avoid copy pasting everything
-		AnalysisEngineDescription jTextTile = createEngineDescription(
-								"src/main/resources/desc/wst-snowball-C99-JTextTileAAE");
+// XXX Needs heavy re configuration in the descriptor file if you want to avoid copy pasting everything
+//		AnalysisEngineDescription jTextTile = createEngineDescription(
+//								"src/main/resources/desc/wst-snowball-C99-JTextTileAAE");
 		
-		AnalysisEngineDescription dbpedia = createEngineDescription(SpotlightAnnotator.class,
-				//SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2222/rest",
-				//SpotlightAnnotator.PARAM_ENDPOINT, "http://spotlight.sztaki.hu:2222/rest",
-				//SpotlightAnnotator.PARAM_ENDPOINT, "http://de.dbpedia.org/spotlight/rest",
-				SpotlightAnnotator.PARAM_ENDPOINT,endpoint,
-				SpotlightAnnotator.PARAM_CONFIDENCE, conf,
-				SpotlightAnnotator.PARAM_ALL_CANDIDATES, true);
+		AnalysisEngineDescription pos1 = createEngineDescription(MatePosTagger.class,
+				MatePosTagger.PARAM_LANGUAGE,"en");
+		
+		AnalysisEngineDescription pos = createEngineDescription(TreeTaggerWrapper.class,
+				TreeTaggerWrapper.PARAM_LANGUAGE,"english",
+				TreeTaggerWrapper.PARAM_ANNOTATE_PARTOFSPEECH,true,
+				TreeTaggerWrapper.PARAM_IMPROVE_GERMAN_SENTENCES,true,
+				TreeTaggerWrapper.PARAM_ANNOTATE_TOKENS,true,
+				TreeTaggerWrapper.PARAM_ANNOTATE_SENTENCES,true);
+		
+// XXX This SHOULD work and replace the second pos tagger, but sadly it does not work for some reason
+//		AnalysisEngineDescription trans = createEngineDescription(AnnotationTranslator.class,
+//				AnnotationTranslator.PARAM_DKPRO_TO_HEIDELTIME, true,
+//				AnnotationTranslator.PARAM_HEIDELTIME_TO_DKPRO, true,
+//				AnnotationTranslator.PARAM_IMPROVE_SENTENCE_DE, false);
+		
+		AnalysisEngineDescription heidel = createEngineDescription(HeidelTime.class,
+				"Language","english",
+				"Date",true,
+				"Time",true,
+				"Duration",true,
+				"Set",true,
+				"ConvertDurations",true,
+				"Type","narratives");
+		
+// XXX May not be stable
+//		AnalysisEngineDescription inteval = createEngineDescription(IntervalTagger.class,
+//				IntervalTagger.PARAM_LANGUAGE,"english");
+		
+//		AnalysisEngineDescription dbpedia = createEngineDescription(SpotlightAnnotator.class,
+//				//SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2222/rest",
+//				//SpotlightAnnotator.PARAM_ENDPOINT, "http://spotlight.sztaki.hu:2222/rest",
+//				//SpotlightAnnotator.PARAM_ENDPOINT, "http://de.dbpedia.org/spotlight/rest",
+//				SpotlightAnnotator.PARAM_ENDPOINT,endpoint,
+//				SpotlightAnnotator.PARAM_CONFIDENCE, conf,
+//				SpotlightAnnotator.PARAM_ALL_CANDIDATES, true);
 
 		AnalysisEngineDescription key = createEngineDescription(KeyPhraseAnnotator.class,
 				KeyPhraseAnnotator.PARAM_LANGUAGE, "en",
-				KeyPhraseAnnotator.PARAM_KEYPHRASE_RATIO, 10);
+				KeyPhraseAnnotator.PARAM_KEYPHRASE_RATIO, 80);
 
-		AnalysisEngineDescription ner = createEngineDescription(StanfordNamedEntityRecognizer.class);
-
+		AnalysisEngineDescription ner = createEngineDescription(StanfordNamedEntityRecognizer.class,
+				StanfordNamedEntityRecognizer.PARAM_LANGUAGE,"en",
+				StanfordNamedEntityRecognizer.PARAM_VARIANT,"all.3class.caseless.distsim.crf");
+		
+		AnalysisEngineDescription chunk = createEngineDescription(OpenNlpChunker.class,
+				OpenNlpChunker.PARAM_LANGUAGE,"en");
+		
 		AnalysisEngineDescription xmiWriter = createEngineDescription(XmiWriter.class,
 				XmiWriter.PARAM_TARGET_LOCATION, "output",
 				XmiWriter.PARAM_TYPE_SYSTEM_FILE, "output/TypeSystem.xml");
-
-//		AnalysisEngineDescription mongoWriter = createEngineDescription(NER2MongoConsumer.class,
-//				NER2MongoConsumer.PARAM_MONGODB, mongoDb,
-//				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection
-//				);
-
+		
 		logger.info("starting pipeline");
-		SimplePipeline.runPipeline(reader, segmenter, jTextTile, mallet, key, ner, xmiWriter);
+		SimplePipeline.runPipeline(reader, segmenter, pos, pos1, chunk, ner, key, heidel, mallet, xmiWriter);
 	}
 }
