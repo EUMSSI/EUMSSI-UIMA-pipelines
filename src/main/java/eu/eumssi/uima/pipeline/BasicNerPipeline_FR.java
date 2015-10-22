@@ -34,15 +34,18 @@ public class BasicNerPipeline_FR
 
 		String mongoDb = "eumssi_db";
 		String mongoCollection = "content_items";
-		String mongoUri = "mongodb://localhost"; // this is the default, so not needed
+		//String mongoUri = "mongodb://localhost:1234"; // through ssh tunnel
+		String mongoUri = "mongodb://localhost:27017"; // default (local)
 
 		CollectionReaderDescription reader = createReaderDescription(BaseCasReader.class,
 				BaseCasReader.PARAM_MAXITEMS,10000000,
+				BaseCasReader.PARAM_MONGOURI, mongoUri,
 				BaseCasReader.PARAM_MONGODB, mongoDb,
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
-				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'fr','processing.available_data': {'$ne': 'ner'}}",
-				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'fr'}",
+				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'fr',"
+						+ "'processing.available_data': {'$ne': 'ner'}}",
+				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'fr'}", // reprocess everything
 				BaseCasReader.PARAM_LANG,"{'$literal':'fr'}"
 				);
 
@@ -66,6 +69,7 @@ public class BasicNerPipeline_FR
 				XmiWriter.PARAM_TYPE_SYSTEM_FILE, "output/TypeSystem.xml");
 
 		AnalysisEngineDescription mongoWriter = createEngineDescription(NER2MongoConsumer.class,
+				NER2MongoConsumer.PARAM_MONGOURI, mongoUri,
 				NER2MongoConsumer.PARAM_MONGODB, mongoDb,
 				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection
 				);

@@ -25,24 +25,26 @@ import eu.eumssi.uima.reader.BaseCasReader;
  * In this pipeline, we use dbpedia-spotlight to annotate entities.
  * It is configured to use the public endpoint, but should preferably point to a local one.
  */
-public class BasicNerPipeline
-{
-	public static void main(String[] args) throws Exception
-	{
+public class BasicNerPipeline {
+
+	public static void main(String[] args) throws Exception {
 
 		Logger logger = Logger.getLogger(BasicNerPipeline.class.toString());
 
 		String mongoDb = "eumssi_db";
 		String mongoCollection = "content_items";
-		String mongoUri = "mongodb://localhost"; // this is the default, so not needed
+		//String mongoUri = "mongodb://localhost:1234"; // through ssh tunnel
+		String mongoUri = "mongodb://localhost:27017"; // default (local)
 
 		CollectionReaderDescription reader = createReaderDescription(BaseCasReader.class,
-				BaseCasReader.PARAM_MAXITEMS,10000000,
+				BaseCasReader.PARAM_MAXITEMS, 10000000,
+				BaseCasReader.PARAM_MONGOURI, mongoUri,
 				BaseCasReader.PARAM_MONGODB, mongoDb,
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
-				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': {'$ne': 'ner'}}",
-				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}",
+				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en',"
+						+ "'processing.available_data': {'$ne': 'ner'}}",
+				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}", // reprocess everything
 				BaseCasReader.PARAM_LANG,"{'$literal':'en'}"
 				);
 
@@ -51,9 +53,8 @@ public class BasicNerPipeline
 		AnalysisEngineDescription dbpedia = createEngineDescription(SpotlightAnnotator.class,
 				SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2222/rest",
 				//SpotlightAnnotator.PARAM_ENDPOINT, "http://spotlight.sztaki.hu:2222/rest",
-				//SpotlightAnnotator.PARAM_ENDPOINT, "http://de.dbpedia.org/spotlight/rest",
 				SpotlightAnnotator.PARAM_CONFIDENCE, 0.6f,
-				SpotlightAnnotator.PARAM_ALL_CANDIDATES, false);
+				SpotlightAnnotator.PARAM_ALL_CANDIDATES, true);
 
 		AnalysisEngineDescription key = createEngineDescription(KeyPhraseAnnotator.class,
 				KeyPhraseAnnotator.PARAM_LANGUAGE, "en",
@@ -68,6 +69,7 @@ public class BasicNerPipeline
 				XmiWriter.PARAM_TYPE_SYSTEM_FILE, "output/TypeSystem.xml");
 
 		AnalysisEngineDescription mongoWriter = createEngineDescription(NER2MongoConsumer.class,
+				NER2MongoConsumer.PARAM_MONGOURI, mongoUri,
 				NER2MongoConsumer.PARAM_MONGODB, mongoDb,
 				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection
 				);

@@ -14,7 +14,7 @@ import org.dbpedia.spotlight.uima.SpotlightAnnotator;
 import com.iai.uima.analysis_component.KeyPhraseAnnotator;
 
 import de.tudarmstadt.ukp.dkpro.core.io.xmi.XmiWriter;
-import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
+import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordNamedEntityRecognizer;
 import edu.upf.glicom.uima.ae.ConfirmLinkAnnotator;
 import eu.eumssi.uima.consumer.NER2MongoConsumer;
@@ -34,23 +34,25 @@ public class BasicNerPipeline_DE
 
 		String mongoDb = "eumssi_db";
 		String mongoCollection = "content_items";
-		String mongoUri = "mongodb://localhost:1234"; // this is the default, so not needed
+		//String mongoUri = "mongodb://localhost:1234"; // through ssh tunnel
+		String mongoUri = "mongodb://localhost:27017"; // default (local)
 
 		CollectionReaderDescription reader = createReaderDescription(BaseCasReader.class,
-				BaseCasReader.PARAM_MAXITEMS,10000000,
+				BaseCasReader.PARAM_MAXITEMS, 10000000,
+				NER2MongoConsumer.PARAM_MONGOURI, mongoUri,
 				BaseCasReader.PARAM_MONGODB, mongoDb,
-				BaseCasReader.PARAM_MONGOURI, mongoUri,
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
-				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'de','processing.available_data': {'$ne': 'ner'}}",
-				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'de'}",
+				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'de','processing.available_data': {'$ne': 'ner'}}",
+				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'de'}", // reprocess everything
 				BaseCasReader.PARAM_LANG,"{'$literal':'de'}"
 				);
 
-		AnalysisEngineDescription segmenter = createEngineDescription(LanguageToolSegmenter.class);
+		AnalysisEngineDescription segmenter = createEngineDescription(OpenNlpSegmenter.class);
 
 		AnalysisEngineDescription dbpedia = createEngineDescription(SpotlightAnnotator.class,
 				SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2225/rest",
+				//SpotlightAnnotator.PARAM_ENDPOINT, "http://de.dbpedia.org/spotlight/rest",
 				SpotlightAnnotator.PARAM_CONFIDENCE, 0.6f,
 				SpotlightAnnotator.PARAM_ALL_CANDIDATES, false);
 
@@ -67,8 +69,8 @@ public class BasicNerPipeline_DE
 				XmiWriter.PARAM_TYPE_SYSTEM_FILE, "output/TypeSystem.xml");
 
 		AnalysisEngineDescription mongoWriter = createEngineDescription(NER2MongoConsumer.class,
-				NER2MongoConsumer.PARAM_MONGODB, mongoDb,
 				NER2MongoConsumer.PARAM_MONGOURI, mongoUri,
+				NER2MongoConsumer.PARAM_MONGODB, mongoDb,
 				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection
 				);
 
