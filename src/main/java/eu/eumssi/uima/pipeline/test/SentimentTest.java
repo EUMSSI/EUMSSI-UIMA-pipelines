@@ -59,7 +59,7 @@ public class SentimentTest
 		AnalysisEngineDescription lemmatizer = createEngineDescription(StanfordLemmatizer.class);
 
 		AnalysisEngineDescription opinion = createEngineDescription(OpinionExpressionAnnotator.class,
-				OpinionExpressionAnnotator.PARAM_POLAR_DICT_FILE, "edu/upf/glicom/dict/EN/compiled/dictOF.dic",
+				OpinionExpressionAnnotator.PARAM_POLAR_DICT_FILE, "edu/upf/glicom/dict/EN/compiled/dictMiniPolar.dic",
 				OpinionExpressionAnnotator.PARAM_POLAR_DICT_TYPE, "lemma",
 				OpinionExpressionAnnotator.PARAM_QUANTNEG_DICT_FILE, "edu/upf/glicom/dict/EN/compiled/QuantNeg_EN_v3.dic"
 				);

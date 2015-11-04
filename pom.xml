@@ -149,7 +149,7 @@
 		<dependency>
 			<groupId>eu.eumssi.uima</groupId>
 			<artifactId>eumssi-io</artifactId>
-			<version>0.2</version>
+			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.upf.glicom.uima</groupId>
@@ -217,7 +217,7 @@
 		<dependency>
 			<groupId>edu.upf.glicom.uima</groupId>
 			<artifactId>opinionAnnotators</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.2</version>
 		</dependency>
 	</dependencies>
 	<repositories>

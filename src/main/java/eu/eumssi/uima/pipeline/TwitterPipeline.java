@@ -13,11 +13,15 @@ import org.dbpedia.spotlight.uima.SpotlightAnnotator;
 
 import com.iai.uima.analysis_component.KeyPhraseAnnotator;
 
-import de.tudarmstadt.ukp.dkpro.core.io.xmi.XmiWriter;
 import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
+import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpPosTagger;
+import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordLemmatizer;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordNamedEntityRecognizer;
 import edu.upf.glicom.uima.ae.ConfirmLinkAnnotatorTweet;
+import edu.upf.glicom.uima.opinion.DistanceBasedOpinionTargetExtractor;
+import edu.upf.glicom.uima.opinion.OpinionExpressionAnnotator;
 import eu.eumssi.uima.consumer.NER2MongoConsumer;
+import eu.eumssi.uima.consumer.Polar2MongoConsumer;
 import eu.eumssi.uima.reader.BaseCasReader;
 
 
@@ -25,16 +29,16 @@ import eu.eumssi.uima.reader.BaseCasReader;
  * In this pipeline, we use dbpedia-spotlight to annotate entities.
  * It is configured to use the public endpoint, but should preferably point to a local one.
  */
-public class TwitterNerPipeline {
+public class TwitterPipeline {
 
 	public static void main(String[] args) throws Exception {
 
-		Logger logger = Logger.getLogger(TwitterNerPipeline.class.toString());
+		Logger logger = Logger.getLogger(TwitterPipeline.class.toString());
 
 		String mongoDb = "eumssi_db";
 		String mongoCollection = "tweets";
-		String mongoUri = "mongodb://localhost:1234"; // through ssh tunnel
-		//String mongoUri = "mongodb://localhost:27017"; // default (local)
+		//String mongoUri = "mongodb://localhost:1234"; // through ssh tunnel
+		String mongoUri = "mongodb://localhost:27017"; // default (local)
 
 		CollectionReaderDescription reader = createReaderDescription(BaseCasReader.class,
 				BaseCasReader.PARAM_MAXITEMS, 10000000,
@@ -42,13 +46,17 @@ public class TwitterNerPipeline {
 				BaseCasReader.PARAM_MONGODB, mongoDb,
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
-				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en',"
-						+ "'processing.available_data': {'$ne': 'ner'}}",
-				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}", // reprocess everything
+				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en',"
+				//		+ "'processing.available_data': {'$ne': 'ner'}}",
+				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}", // reprocess everything
 				BaseCasReader.PARAM_LANG,"{'$literal':'en'}"
 				);
 
 		AnalysisEngineDescription segmenter = createEngineDescription(LanguageToolSegmenter.class);
+
+		AnalysisEngineDescription posTagger = createEngineDescription(OpenNlpPosTagger.class);
+
+		AnalysisEngineDescription lemmatizer = createEngineDescription(StanfordLemmatizer.class);
 
 		AnalysisEngineDescription dbpedia = createEngineDescription(SpotlightAnnotator.class,
 				SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2222/rest",
@@ -64,18 +72,32 @@ public class TwitterNerPipeline {
 
 		AnalysisEngineDescription validate = createEngineDescription(ConfirmLinkAnnotatorTweet.class);
 
-		AnalysisEngineDescription xmiWriter = createEngineDescription(XmiWriter.class,
-				XmiWriter.PARAM_TARGET_LOCATION, "output",
-				XmiWriter.PARAM_TYPE_SYSTEM_FILE, "output/TypeSystem.xml");
+		AnalysisEngineDescription opinion = createEngineDescription(OpinionExpressionAnnotator.class,
+				OpinionExpressionAnnotator.PARAM_POLAR_DICT_FILE, "edu/upf/glicom/dict/EN/compiled/dictMiniPolar.dic",
+				OpinionExpressionAnnotator.PARAM_POLAR_DICT_TYPE, "lemma",
+				OpinionExpressionAnnotator.PARAM_QUANTNEG_DICT_FILE, "edu/upf/glicom/dict/EN/compiled/QuantNeg_EN_v3.dic"
+				);
 
-		AnalysisEngineDescription mongoWriter = createEngineDescription(NER2MongoConsumer.class,
+		AnalysisEngineDescription targetExtractor = createEngineDescription(DistanceBasedOpinionTargetExtractor.class);
+
+		AnalysisEngineDescription nerWriter = createEngineDescription(NER2MongoConsumer.class,
 				NER2MongoConsumer.PARAM_MONGOURI, mongoUri,
 				NER2MongoConsumer.PARAM_MONGODB, mongoDb,
 				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection
 				);
 
+		AnalysisEngineDescription polarWriter = createEngineDescription(Polar2MongoConsumer.class,
+				Polar2MongoConsumer.PARAM_MONGOURI, mongoUri,
+				Polar2MongoConsumer.PARAM_MONGODB, mongoDb,
+				Polar2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection
+				);
+
 		logger.info("starting pipeline");
-		SimplePipeline.runPipeline(reader, segmenter, dbpedia, ner, validate, mongoWriter);
+		SimplePipeline.runPipeline(
+				reader, segmenter, lemmatizer, posTagger,
+				opinion, targetExtractor, 
+				dbpedia, ner, validate,
+				nerWriter, polarWriter);
 	}
 
 
