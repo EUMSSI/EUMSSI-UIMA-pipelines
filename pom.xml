@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.eumssi.uima</groupId>
 	<artifactId>eumssi-pipelines</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<build>
 		<plugins>
 			<plugin>
@@ -221,6 +221,10 @@
 		</dependency>
 	</dependencies>
 	<repositories>
+                <repository>
+                        <id>glicom</id>
+                        <url>http://apps.glicom.upf.edu/artifactory/repo</url>
+                </repository>
 		<repository>
 			<id>ukp-oss-releases</id>
 			<url>http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-releases</url>
@@ -228,6 +232,6 @@
 		<repository>
 			<id>ukp-oss-snapshots</id>
 			<url>http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots</url>
-		</repository>
+                </repository>
 	</repositories>
 </project>
