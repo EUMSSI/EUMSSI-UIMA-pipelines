@@ -42,17 +42,18 @@ public class FakeAsrSegmentPipeline
 
 		String mongoDb = "eumssi_db";
 		String mongoCollection = "content_items";
-		//String mongoUri = "mongodb://localhost:1234";
-		String mongoUri = "mongodb://localhost";
+		String mongoUri = "mongodb://localhost:1234";
+		//String mongoUri = "mongodb://localhost";
 		String segmentMongoCollection ="segments";
 
 		CollectionReaderDescription reader = createReaderDescription(AsrReader.class,
-				AsrReader.PARAM_MAXITEMS,1000,
+				AsrReader.PARAM_MAXITEMS,1000000,
 				AsrReader.PARAM_MONGODB, mongoDb,
 				AsrReader.PARAM_MONGOURI, mongoUri,
 				AsrReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				AsrReader.PARAM_FIELDS, "processing.results.audio_transcript",
-				AsrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': 'audio_transcript'}",
+				//AsrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': 'audio_transcript'}",
+				AsrReader.PARAM_QUERY,"{'processing.available_data': 'audio_transcript'}",
 				AsrReader.PARAM_LANG,"{'$literal':'en'}",
 				AsrReader.PARAM_ONLYWORDS, true
 				);
