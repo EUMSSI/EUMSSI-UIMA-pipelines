@@ -29,11 +29,11 @@ import eu.eumssi.uima.reader.BaseCasReader;
  * In this pipeline, we use dbpedia-spotlight to annotate entities.
  * It is configured to use the public endpoint, but should preferably point to a local one.
  */
-public class TwitterPipeline {
+public class TwitterPolarityPipeline {
 
 	public static void main(String[] args) throws Exception {
 
-		Logger logger = Logger.getLogger(TwitterPipeline.class.toString());
+		Logger logger = Logger.getLogger(TwitterPolarityPipeline.class.toString());
 
 		String mongoDb = "eumssi_db";
 		String mongoCollection = "tweets";
@@ -58,20 +58,6 @@ public class TwitterPipeline {
 
 		AnalysisEngineDescription lemmatizer = createEngineDescription(StanfordLemmatizer.class);
 
-		AnalysisEngineDescription dbpedia = createEngineDescription(SpotlightAnnotator.class,
-				SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2222/rest",
-				//SpotlightAnnotator.PARAM_ENDPOINT, "http://spotlight.sztaki.hu:2222/rest",
-				SpotlightAnnotator.PARAM_CONFIDENCE, 0.35f,
-				SpotlightAnnotator.PARAM_ALL_CANDIDATES, true);
-
-		AnalysisEngineDescription key = createEngineDescription(KeyPhraseAnnotator.class,
-				KeyPhraseAnnotator.PARAM_LANGUAGE, "en",
-				KeyPhraseAnnotator.PARAM_KEYPHRASE_RATIO, 10);
-
-		AnalysisEngineDescription ner = createEngineDescription(StanfordNamedEntityRecognizer.class);
-
-		AnalysisEngineDescription validate = createEngineDescription(ConfirmLinkAnnotatorTweet.class);
-
 		AnalysisEngineDescription opinion = createEngineDescription(OpinionExpressionAnnotator.class,
 				OpinionExpressionAnnotator.PARAM_POLAR_DICT_FILE, "edu/upf/glicom/dict/EN/compiled/dictMiniPolar.dic",
 				OpinionExpressionAnnotator.PARAM_POLAR_DICT_TYPE, "lemma",
@@ -79,12 +65,6 @@ public class TwitterPipeline {
 				);
 
 		AnalysisEngineDescription targetExtractor = createEngineDescription(DistanceBasedOpinionTargetExtractor.class);
-
-		AnalysisEngineDescription nerWriter = createEngineDescription(NER2MongoConsumer.class,
-				NER2MongoConsumer.PARAM_MONGOURI, mongoUri,
-				NER2MongoConsumer.PARAM_MONGODB, mongoDb,
-				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection
-				);
 
 		AnalysisEngineDescription polarWriter = createEngineDescription(Polar2MongoConsumer.class,
 				Polar2MongoConsumer.PARAM_MONGOURI, mongoUri,
@@ -96,8 +76,7 @@ public class TwitterPipeline {
 		SimplePipeline.runPipeline(
 				reader, segmenter, lemmatizer, posTagger,
 				opinion, targetExtractor, 
-				dbpedia, ner, validate,
-				nerWriter, polarWriter);
+				polarWriter);
 	}
 
 
