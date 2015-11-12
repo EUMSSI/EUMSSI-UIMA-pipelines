@@ -47,7 +47,7 @@ public class AsrTest
 				AsrReader.PARAM_MONGOURI, mongoUri,
 				AsrReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				AsrReader.PARAM_FIELDS, "processing.results.audio_transcript",
-				//AsrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': {'$ne': 'ner'}}",
+				//AsrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': {'$ne': 'text_nerl'}}",
 				AsrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': 'audio_transcript'}",
 				AsrReader.PARAM_LANG,"{'$literal':'en'}",
 				AsrReader.PARAM_ONLYWORDS,false

@@ -43,7 +43,7 @@ public class BasicNerPipeline_ES
 				BaseCasReader.PARAM_MONGODB, mongoDb,
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
-				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'es','processing.available_data': {'$ne': 'ner'}}",
+				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'es','processing.available_data': {'$ne': 'text_nerl'}}",
 				// BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'es'}", // reprocess everything
 				BaseCasReader.PARAM_LANG,"{'$literal':'es'}"
 				);
@@ -70,7 +70,8 @@ public class BasicNerPipeline_ES
 		AnalysisEngineDescription mongoWriter = createEngineDescription(NER2MongoConsumer.class,
 				NER2MongoConsumer.PARAM_MONGOURI, mongoUri,
 				NER2MongoConsumer.PARAM_MONGODB, mongoDb,
-				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection
+				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection,
+				NER2MongoConsumer.PARAM_QUEUE, "text_nerl"
 				);
 
 		logger.info("starting pipeline");

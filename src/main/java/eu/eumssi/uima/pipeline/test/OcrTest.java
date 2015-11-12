@@ -43,8 +43,8 @@ public class OcrTest
 
 		String mongoDb = "eumssi_db";
 		String mongoCollection = "content_items";
-		String mongoUri = "mongodb://localhost:1234"; // through ssh tunnel
-		//String mongoUri = "mongodb://localhost:27017"; // default (local)
+		//String mongoUri = "mongodb://localhost:1234"; // through ssh tunnel
+		String mongoUri = "mongodb://localhost:27017"; // default (local)
 
 		CollectionReaderDescription reader = createReaderDescription(OcrReader.class,
 				OcrReader.PARAM_MAXITEMS,10000,
@@ -54,7 +54,7 @@ public class OcrTest
 				OcrReader.PARAM_FIELDS, "processing.results.video_ocr",
 				//				OcrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en',"
 				//						+ "'processing.available_data': 'video_ocr',"
-				//						+ "'processing.available_data': {'$ne': 'ocr-nerl'}}",
+				//						+ "'processing.available_data': {'$ne': 'text_ocr-nerl'}}",
 				OcrReader.PARAM_QUERY,"{'meta.source.inLanguage':'en',"
 				 		+ "'processing.available_data': 'video_ocr'}", // reprocess everything
 				OcrReader.PARAM_LANG,"{'$literal':'en'}",
@@ -81,20 +81,13 @@ public class OcrTest
 				XmiWriter.PARAM_TARGET_LOCATION, "output",
 				XmiWriter.PARAM_TYPE_SYSTEM_FILE, "output/TypeSystem.xml");
 
-		AnalysisEngineDescription mongoWriter = createEngineDescription(OcrNerlConsumer.class,
-				OcrNerlConsumer.PARAM_MONGOURI, mongoUri,
-				OcrNerlConsumer.PARAM_MONGODB, mongoDb,
-				OcrNerlConsumer.PARAM_MONGOCOLLECTION, mongoCollection
-				);
-
 		JCasIterable pipeline = new JCasIterable(
 				reader,
 				segmenter,
 				dbpedia,
 				//key,
 				ner,
-				xmiWriter,
-				mongoWriter
+				xmiWriter
 				);
 
 		// Run and show results in console

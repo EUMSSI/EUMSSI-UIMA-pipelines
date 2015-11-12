@@ -15,13 +15,9 @@ import com.iai.uima.analysis_component.KeyPhraseAnnotator;
 
 import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpPosTagger;
-import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordLemmatizer;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordNamedEntityRecognizer;
 import edu.upf.glicom.uima.ae.ConfirmLinkAnnotatorTweet;
-import edu.upf.glicom.uima.opinion.DistanceBasedOpinionTargetExtractor;
-import edu.upf.glicom.uima.opinion.OpinionExpressionAnnotator;
 import eu.eumssi.uima.consumer.NER2MongoConsumer;
-import eu.eumssi.uima.consumer.Polar2MongoConsumer;
 import eu.eumssi.uima.reader.BaseCasReader;
 
 
@@ -47,7 +43,7 @@ public class TwitterNerPipeline {
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
 				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en',"
-						+ "'processing.available_data': {'$ne': 'ner'}}",
+						+ "'processing.available_data': {'$ne': 'text_nerl'}}",
 				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}", // reprocess everything
 				BaseCasReader.PARAM_LANG,"{'$literal':'en'}"
 				);
@@ -73,7 +69,8 @@ public class TwitterNerPipeline {
 		AnalysisEngineDescription nerWriter = createEngineDescription(NER2MongoConsumer.class,
 				NER2MongoConsumer.PARAM_MONGOURI, mongoUri,
 				NER2MongoConsumer.PARAM_MONGODB, mongoDb,
-				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection
+				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection,
+				NER2MongoConsumer.PARAM_QUEUE, "text_nerl"
 				);
 
 		logger.info("starting pipeline");

@@ -9,18 +9,12 @@ import java.util.logging.Logger;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReaderDescription;
 import org.apache.uima.fit.pipeline.SimplePipeline;
-import org.dbpedia.spotlight.uima.SpotlightAnnotator;
-
-import com.iai.uima.analysis_component.KeyPhraseAnnotator;
 
 import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpPosTagger;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordLemmatizer;
-import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordNamedEntityRecognizer;
-import edu.upf.glicom.uima.ae.ConfirmLinkAnnotatorTweet;
 import edu.upf.glicom.uima.opinion.DistanceBasedOpinionTargetExtractor;
 import edu.upf.glicom.uima.opinion.OpinionExpressionAnnotator;
-import eu.eumssi.uima.consumer.NER2MongoConsumer;
 import eu.eumssi.uima.consumer.Polar2MongoConsumer;
 import eu.eumssi.uima.reader.BaseCasReader;
 
@@ -41,13 +35,13 @@ public class TwitterPolarityPipeline {
 		String mongoUri = "mongodb://localhost:27017"; // default (local)
 
 		CollectionReaderDescription reader = createReaderDescription(BaseCasReader.class,
-				BaseCasReader.PARAM_MAXITEMS, 10000000,
+				BaseCasReader.PARAM_MAXITEMS, 100,
 				BaseCasReader.PARAM_MONGOURI, mongoUri,
 				BaseCasReader.PARAM_MONGODB, mongoDb,
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
 				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en',"
-				//		+ "'processing.available_data': {'$ne': 'ner'}}",
+				//		+ "'processing.available_data': {'$ne': 'text_polarity'}}",
 				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}", // reprocess everything
 				BaseCasReader.PARAM_LANG,"{'$literal':'en'}"
 				);
@@ -69,10 +63,11 @@ public class TwitterPolarityPipeline {
 		AnalysisEngineDescription polarWriter = createEngineDescription(Polar2MongoConsumer.class,
 				Polar2MongoConsumer.PARAM_MONGOURI, mongoUri,
 				Polar2MongoConsumer.PARAM_MONGODB, mongoDb,
-				Polar2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection
+				Polar2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection,
+				Polar2MongoConsumer.PARAM_QUEUE, "text_polarity"
 				);
 
-		logger.info("starting pipeline");
+		logger.info("starting twitter pipeline");
 		SimplePipeline.runPipeline(
 				reader, segmenter, lemmatizer, posTagger,
 				opinion, targetExtractor, 
