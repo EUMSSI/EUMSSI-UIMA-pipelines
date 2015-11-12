@@ -35,7 +35,7 @@ public class TwitterPolarityPipeline {
 		String mongoUri = "mongodb://localhost:27017"; // default (local)
 
 		CollectionReaderDescription reader = createReaderDescription(BaseCasReader.class,
-				BaseCasReader.PARAM_MAXITEMS, 100,
+				BaseCasReader.PARAM_MAXITEMS, 10000000,
 				BaseCasReader.PARAM_MONGOURI, mongoUri,
 				BaseCasReader.PARAM_MONGODB, mongoDb,
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
