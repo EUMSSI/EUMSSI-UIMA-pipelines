@@ -187,7 +187,7 @@
 		<dependency>
 			<groupId>de.unihd.dbs</groupId>
 			<artifactId>heideltime</artifactId>
-			<version>2.0</version>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
@@ -219,12 +219,33 @@
 			<artifactId>opinionAnnotators</artifactId>
 			<version>0.2</version>
 		</dependency>
+		<dependency>
+			<groupId>com.iai</groupId>
+			<artifactId>com.iai.OfficeHolderAnnotator</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.iai</groupId>
+			<artifactId>QuoteAnnotator</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>edu.stanford.nlp</groupId>
+			<artifactId>stanford-corenlp</artifactId>
+			<version>3.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.api.coref-asl
+			</artifactId>
+		</dependency>
 	</dependencies>
 	<repositories>
-                <repository>
-                        <id>glicom</id>
-                        <url>http://apps.glicom.upf.edu/artifactory/repo</url>
-                </repository>
+		<repository>
+			<id>glicom</id>
+			<url>http://apps.glicom.upf.edu/artifactory/repo</url>
+		</repository>
 		<repository>
 			<id>ukp-oss-releases</id>
 			<url>http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-releases</url>
@@ -232,6 +253,6 @@
 		<repository>
 			<id>ukp-oss-snapshots</id>
 			<url>http://zoidberg.ukp.informatik.tu-darmstadt.de/artifactory/public-snapshots</url>
-                </repository>
+		</repository>
 	</repositories>
 </project>
