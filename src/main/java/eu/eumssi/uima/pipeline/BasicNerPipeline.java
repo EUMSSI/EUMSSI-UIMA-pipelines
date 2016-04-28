@@ -18,6 +18,7 @@ import de.tudarmstadt.ukp.dkpro.core.languagetool.LanguageToolSegmenter;
 import de.tudarmstadt.ukp.dkpro.core.stanfordnlp.StanfordNamedEntityRecognizer;
 import edu.upf.glicom.uima.ae.ConfirmLinkAnnotator;
 import eu.eumssi.uima.consumer.NER2MongoConsumer;
+import eu.eumssi.uima.consumer.XmiMongoConsumer;
 import eu.eumssi.uima.reader.BaseCasReader;
 
 
@@ -36,6 +37,8 @@ public class BasicNerPipeline {
 		//String mongoUri = "mongodb://localhost:1234"; // through ssh tunnel
 		String mongoUri = "mongodb://localhost:27017"; // default (local)
 
+		String queueName = "text_nerl";
+		
 		CollectionReaderDescription reader = createReaderDescription(BaseCasReader.class,
 				BaseCasReader.PARAM_MAXITEMS, 10000000,
 				BaseCasReader.PARAM_MONGOURI, mongoUri,
@@ -43,7 +46,7 @@ public class BasicNerPipeline {
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
 				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en',"
-						+ "'processing.available_data': {'$ne': 'text_nerl'}}",
+						+ "'processing.queues."+queueName+"': 'pending'}",
 				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}", // reprocess everything
 				BaseCasReader.PARAM_LANG,"{'$literal':'en'}"
 				);
@@ -56,7 +59,7 @@ public class BasicNerPipeline {
 				SpotlightAnnotator.PARAM_CONFIDENCE, 0.6f,
 				SpotlightAnnotator.PARAM_ALL_CANDIDATES, true);
 
-		AnalysisEngineDescription key = createEngineDescription(KeyPhraseAnnotator.class,
+		AnalysisEngineDescription kea = createEngineDescription(KeyPhraseAnnotator.class,
 				KeyPhraseAnnotator.PARAM_LANGUAGE, "en",
 				KeyPhraseAnnotator.PARAM_KEYPHRASE_RATIO, 10);
 
@@ -72,11 +75,18 @@ public class BasicNerPipeline {
 				NER2MongoConsumer.PARAM_MONGOURI, mongoUri,
 				NER2MongoConsumer.PARAM_MONGODB, mongoDb,
 				NER2MongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection,
-				NER2MongoConsumer.PARAM_QUEUE, "text_nerl"
+				NER2MongoConsumer.PARAM_QUEUE, queueName
 				);
+		AnalysisEngineDescription xmiMongoWriter = createEngineDescription(XmiMongoConsumer.class,
+				XmiMongoConsumer.PARAM_QUEUE, queueName,
+				//XmiMongoConsumer.PARAM_COMPRESSION,CompressionMethod.GZIP,
+				XmiMongoConsumer.PARAM_MONGODB, mongoDb,
+				XmiMongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection,
+				XmiMongoConsumer.PARAM_MONGOURI, mongoUri);
+				
 
 		logger.info("starting pipeline");
-		SimplePipeline.runPipeline(reader, segmenter, dbpedia, ner, validate, mongoWriter);
+		SimplePipeline.runPipeline(reader, segmenter, dbpedia, ner, validate, kea, mongoWriter, xmiMongoWriter);
 	}
 
 

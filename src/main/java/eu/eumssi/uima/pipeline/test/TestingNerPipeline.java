@@ -13,11 +13,11 @@ import org.apache.uima.fit.pipeline.JCasIterable;
 import org.apache.uima.jcas.JCas;
 import org.dbpedia.spotlight.uima.SpotlightAnnotator;
 import org.dbpedia.spotlight.uima.types.DBpediaResource;
-import org.dbpedia.spotlight.uima.types.TopDBpediaResource;
 
 import com.iai.uima.analysis_component.KeyPhraseAnnotator;
 
 import de.tudarmstadt.ukp.dkpro.core.api.ner.type.NamedEntity;
+import de.tudarmstadt.ukp.dkpro.core.api.resources.CompressionMethod;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
 import de.tudarmstadt.ukp.dkpro.core.io.xmi.XmiWriter;
@@ -27,6 +27,8 @@ import edu.upf.glicom.uima.ae.ConfirmLinkAnnotator;
 import edu.upf.glicom.uima.babelfy.BabelfyAnnotator;
 import edu.upf.glicom.uima.ts.VerifiedDBpediaResource;
 import edu.upf.glicom.uima.types.BabelfyResource;
+import eu.eumssi.uima.consumer.XmiMongoConsumer;
+import eu.eumssi.uima.reader.BaseCasReader;
 
 
 /**
@@ -44,19 +46,19 @@ public class TestingNerPipeline
 		String mongoCollection = "content_items";
 		String mongoUri = "mongodb://localhost"; // this is the default, so not needed
 		
-		CollectionReaderDescription reader = createReaderDescription(TextReader.class,
-                TextReader.PARAM_SOURCE_LOCATION, "input/en/*", 
-                TextReader.PARAM_LANGUAGE, "en");
+//		CollectionReaderDescription reader = createReaderDescription(TextReader.class,
+//                TextReader.PARAM_SOURCE_LOCATION, "input/en/*", 
+//                TextReader.PARAM_LANGUAGE, "en");
 		
-//		CollectionReaderDescription reader = createReaderDescription(BaseCasReader.class,
-//				BaseCasReader.PARAM_MAXITEMS,10,
-//				BaseCasReader.PARAM_MONGODB, mongoDb,
-//				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
-//				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
-//				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.available_data': {'$ne': 'ner'}}",
-//				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}",
-//				BaseCasReader.PARAM_LANG,"{'$literal':'en'}"
-//				);
+		CollectionReaderDescription reader = createReaderDescription(BaseCasReader.class,
+				BaseCasReader.PARAM_MAXITEMS,100,
+				BaseCasReader.PARAM_MONGODB, mongoDb,
+				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
+				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
+				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.queues.text_nerl': 'pending'}",
+				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}",
+				BaseCasReader.PARAM_LANG,"{'$literal':'en'}"
+				);
 
 		AnalysisEngineDescription segmenter = createEngineDescription(LanguageToolSegmenter.class);
 
@@ -68,9 +70,9 @@ public class TestingNerPipeline
 				SpotlightAnnotator.PARAM_CONFIDENCE, 0.6f,
 				SpotlightAnnotator.PARAM_ALL_CANDIDATES, false);
 
-		AnalysisEngineDescription key = createEngineDescription(KeyPhraseAnnotator.class,
-				KeyPhraseAnnotator.PARAM_LANGUAGE, "en",
-				KeyPhraseAnnotator.PARAM_KEYPHRASE_RATIO, 10);
+//		AnalysisEngineDescription key = createEngineDescription(KeyPhraseAnnotator.class,
+//				KeyPhraseAnnotator.PARAM_LANGUAGE, "en",
+//				KeyPhraseAnnotator.PARAM_KEYPHRASE_RATIO, 10);
 
 		AnalysisEngineDescription ner = createEngineDescription(StanfordNamedEntityRecognizer.class);
 
@@ -85,15 +87,24 @@ public class TestingNerPipeline
 				XmiWriter.PARAM_TARGET_LOCATION, "output",
 				XmiWriter.PARAM_TYPE_SYSTEM_FILE, "output/TypeSystem.xml");
 
+		AnalysisEngineDescription xmiMongoWriter = createEngineDescription(XmiMongoConsumer.class,
+				XmiMongoConsumer.PARAM_QUEUE,"text_nerl",
+				//XmiMongoConsumer.PARAM_COMPRESSION,CompressionMethod.GZIP,
+				XmiMongoConsumer.PARAM_MONGODB, mongoDb,
+				XmiMongoConsumer.PARAM_MONGOCOLLECTION, mongoCollection,
+				XmiMongoConsumer.PARAM_MONGOURI, mongoUri);
+				
+				
 		JCasIterable pipeline = new JCasIterable(
 				reader,
 				segmenter,
-				dbpedia,
+				//dbpedia,
 				//key,
 				ner,
 				validate,
 				//babelfy,
-				xmiWriter
+				xmiWriter,
+				xmiMongoWriter
 				);
 
 		// Run and show results in console

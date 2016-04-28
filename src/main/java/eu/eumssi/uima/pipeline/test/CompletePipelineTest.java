@@ -185,8 +185,9 @@ public class CompletePipelineTest {
 
 		AnalysisEngineDescription key = createEngineDescription(KeyPhraseAnnotator.class,
 				KeyPhraseAnnotator.PARAM_LANGUAGE, "en",
-				KeyPhraseAnnotator.PARAM_KEYPHRASE_RATIO, 80,
-				KeyPhraseAnnotator.PARAM_STOPWORDLIST,System.getProperty("KEA_HOME")+"/data/stopwords/stopwords_en.txt");
+				KeyPhraseAnnotator.PARAM_KEYPHRASE_RATIO, 80
+				//KeyPhraseAnnotator.PARAM_STOPWORDLIST,System.getProperty("KEA_HOME")+"/data/stopwords/stopwords_en.txt"
+				);
 
 		AnalysisEngineDescription ner = createEngineDescription(StanfordNamedEntityRecognizer.class,
 				StanfordNamedEntityRecognizer.PARAM_LANGUAGE,"en",
