@@ -125,8 +125,8 @@
 			<artifactId>de.tudarmstadt.ukp.dkpro.core.io.text-asl</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.dbpedia.spotlight</groupId>
-			<artifactId>uima</artifactId>
+			<groupId>edu.upf.glicom.uima</groupId>
+			<artifactId>dbpedia-spotlight</artifactId>
 			<version>0.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -160,6 +160,24 @@
 			<groupId>edu.upf.glicom.uima</groupId>
 			<artifactId>ConfirmLinkAnnotator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>jersey-bundle</artifactId>
+					<groupId>com.sun.jersey</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jersey-client</artifactId>
+					<groupId>com.sun.jersey</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>jersey-core</artifactId>
+					<groupId>com.sun.jersey</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>uima</artifactId>
+					<groupId>org.dbpedia.spotlight</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.cleartk</groupId>
