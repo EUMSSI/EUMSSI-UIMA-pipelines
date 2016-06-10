@@ -45,6 +45,7 @@ public class BasicNerPipeline {
 				BaseCasReader.PARAM_MONGODB, mongoDb,
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
+				BaseCasReader.PARAM_METAFIELDS, "meta.source.datePublished",
 				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en',"
 						+ "'processing.queues."+queueName+"': 'pending'}",
 				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}", // reprocess everything

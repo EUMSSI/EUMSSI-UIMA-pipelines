@@ -4,6 +4,7 @@ package eu.eumssi.uima.pipeline.test;
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
 import static org.apache.uima.fit.factory.CollectionReaderFactory.createReaderDescription;
 import static org.apache.uima.fit.util.JCasUtil.select;
+import static org.apache.uima.fit.util.JCasUtil.selectSingle;
 
 import java.util.logging.Logger;
 
@@ -29,6 +30,7 @@ import edu.upf.glicom.uima.ts.VerifiedDBpediaResource;
 import edu.upf.glicom.uima.types.BabelfyResource;
 import eu.eumssi.uima.consumer.XmiMongoConsumer;
 import eu.eumssi.uima.reader.BaseCasReader;
+import eu.eumssi.uima.ts.SourceMeta;
 
 
 /**
@@ -55,6 +57,7 @@ public class TestingNerPipeline
 				BaseCasReader.PARAM_MONGODB, mongoDb,
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
+				BaseCasReader.PARAM_METAFIELDS, "meta.source.datePublished",
 				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en','processing.queues.text_nerl': 'pending'}",
 				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}",
 				BaseCasReader.PARAM_LANG,"{'$literal':'en'}"
@@ -63,7 +66,7 @@ public class TestingNerPipeline
 		AnalysisEngineDescription segmenter = createEngineDescription(LanguageToolSegmenter.class);
 
 		AnalysisEngineDescription dbpedia = createEngineDescription(SpotlightAnnotator.class,
-				SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2223/rest",
+				SpotlightAnnotator.PARAM_ENDPOINT, "http://localhost:2222/rest",
 				//SpotlightAnnotator.PARAM_ENDPOINT, "http://spotlight.dbpedia.org/rest",
 				//SpotlightAnnotator.PARAM_ENDPOINT, "http://spotlight.sztaki.hu:2222/rest",
 				//SpotlightAnnotator.PARAM_ENDPOINT, "http://de.dbpedia.org/spotlight/rest",
@@ -98,19 +101,19 @@ public class TestingNerPipeline
 		JCasIterable pipeline = new JCasIterable(
 				reader,
 				segmenter,
-				//dbpedia,
+				dbpedia,
 				//key,
 				ner,
 				validate,
 				//babelfy,
-				xmiWriter,
-				xmiMongoWriter
+				xmiWriter
+				//xmiMongoWriter
 				);
 
 		// Run and show results in console
 		for (JCas jcas : pipeline) {
-			//SourceMeta meta = selectSingle(jcas, SourceMeta.class);
-			//System.out.println("\n\n=========\n\n" + meta.getDocumentId() + ": " + jcas.getDocumentText() + "\n");
+			SourceMeta meta = selectSingle(jcas, SourceMeta.class);
+			System.out.println("\n\n=========\n\n" + meta.getDocumentId() + ": " + jcas.getDocumentText() + "("+meta.getDatePublished()+")\n");
 
 			for (Token token : select(jcas, Token.class)) {
 				System.out.printf("  %-16s %n", 

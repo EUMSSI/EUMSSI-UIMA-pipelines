@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.eumssi.uima</groupId>
 	<artifactId>eumssi-pipelines</artifactId>
-	<version>0.1.5-SNAPSHOT</version>
+	<version>0.1.6-SNAPSHOT</version>
 	<build>
 		<plugins>
 			<plugin>
@@ -149,7 +149,7 @@
 		<dependency>
 			<groupId>eu.eumssi.uima</groupId>
 			<artifactId>eumssi-io</artifactId>
-			<version>0.5-SNAPSHOT</version>
+			<version>0.6-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>uima</artifactId>
