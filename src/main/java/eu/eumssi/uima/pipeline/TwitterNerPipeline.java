@@ -42,8 +42,7 @@ public class TwitterNerPipeline {
 				BaseCasReader.PARAM_MONGODB, mongoDb,
 				BaseCasReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				BaseCasReader.PARAM_FIELDS, "meta.source.headline,meta.source.title,meta.source.description,meta.source.text",
-				BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en',"
-						+ "'processing.available_data': {'$ne': 'text_nerl'}}",
+				BaseCasReader.PARAM_QUERY,"{'processing.queues.text_nerl':'pending','meta.source.inLanguage':'en'}",
 				//BaseCasReader.PARAM_QUERY,"{'meta.source.inLanguage':'en'}", // reprocess everything
 				BaseCasReader.PARAM_LANG,"{'$literal':'en'}"
 				);

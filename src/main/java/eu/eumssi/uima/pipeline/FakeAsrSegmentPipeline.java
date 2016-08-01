@@ -44,7 +44,7 @@ public class FakeAsrSegmentPipeline
 				AsrReader.PARAM_MONGOCOLLECTION, mongoCollection,
 				AsrReader.PARAM_FIELDS, "processing.results.audio_transcript",
 				AsrReader.PARAM_QUERY,"{'processing.available_data': 'audio_transcript'}",
-				AsrReader.PARAM_LANG,"",
+				AsrReader.PARAM_LANG,"{'$literal':'en'}",
 				AsrReader.PARAM_ONLYWORDS, true
 				);
 
